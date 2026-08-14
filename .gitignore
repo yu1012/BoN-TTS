@@ -1,0 +1,34 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Generated artifacts: candidate pools are several GB of audio.
+# data/ is the Makefile's default corpus mount, created empty by docker run.
+outputs/
+cache/
+data/
+*.wav
+*.flac
+
+# Manuscript sources and LaTeX build artifacts. This repo ships the code; the
+# paper lives elsewhere. .dockerignore already excludes paper/ from the image.
+paper/
+*.tex
+*.bib
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# Local overrides
+configs/*.local.yaml
+.env

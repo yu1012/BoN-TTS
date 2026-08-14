@@ -1,0 +1,41 @@
+# Usage (from the repository root):
+#   OUTPUT_DIR=/data/bon-tts docker compose -f docker/docker-compose.yml run --rm bon-tts bash
+#
+# Three mounts, all deliberately outside the image:
+#   /outputs  candidate pools and results (tens of GB — put this on a data volume)
+#   /cache    HuggingFace + torch.hub checkpoints (~10 GB, shared across rebuilds)
+#   /data     read-only corpora (LibriSpeech test-clean)
+services:
+  bon-tts:
+    image: bon-tts:0.1.0
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ${OUTPUT_DIR:-../outputs}:/outputs
+      - ${CACHE_DIR:-../cache}:/cache
+      - ${DATA_DIR:-../data}:/data:ro
+      # Live source mount: edit on the host, run in the container without rebuilding.
+      - ../bon_tts:/workspace/bon_tts
+      - ../scripts:/workspace/scripts
+      - ../configs:/workspace/configs
+      - ../tests:/workspace/tests
+    environment:
+      BON_TTS_OUTPUT_DIR: /outputs
+      HF_HOME: /cache/huggingface
+      TORCH_HOME: /cache/torch
+      # Restrict visible GPUs with e.g. CUDA_VISIBLE_DEVICES=0,1
+      CUDA_VISIBLE_DEVICES: ${CUDA_VISIBLE_DEVICES:-0}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    # F5-TTS dataloaders and the vocoder use shared memory; the 64 MB default
+    # is not enough and surfaces as opaque worker crashes.
+    shm_size: "8gb"
+    working_dir: /workspace
+    stdin_open: true
+    tty: true

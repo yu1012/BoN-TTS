@@ -1,0 +1,48 @@
+# LibriSpeech-PC test-clean cross-sentence — the F5-TTS official protocol.
+#
+# Every value here matches the setup the paper reports. Changing the tts block
+# breaks comparability with published F5-TTS / CosyVoice 2 / MaskGCT numbers.
+#
+# Artifacts land under output_dir; the N=10 candidate pool is several GB of audio, so
+# point it at a data volume. Override without editing this file via the
+# BON_TTS_OUTPUT_DIR environment variable or `--set output_dir=/path`.
+output_dir: ./outputs
+
+data:
+  name: librispeech_pc_test_clean
+  # Official list from the F5-TTS repository (data/ directory), 1127 utterances.
+  lst_file: librispeech_pc_test_clean_cross_sentence.lst
+  expected_samples: 1127
+
+tts:
+  model_type: F5TTS_v1_Base
+  ckpt_file: ""          # empty = download the public checkpoint
+  vocab_file: ""
+  ode_method: euler
+  steps: 32              # F5-TTS default inference recipe
+  cfg_strength: 2.0
+  sway_sampling_coef: -1.0
+  seed: 42               # seed of candidate 0, i.e. the single-shot baseline
+  target_rms: 0.1
+  speed: 1.0
+
+pool:
+  name: pool_n10
+  n_candidates: 10
+  # Candidate seeds are seed + i * seed_offset -> 42, 1042, ..., 9042.
+  seed_offset: 1000
+
+verifier:
+  metric: wer_cer        # joint WER+CER score used for all reported results
+  composite_alpha: 0.5   # score = alpha * WER + (1 - alpha) * CER
+  # 'simple' (lowercase+strip) reproduces the published tables. 'f5_official'
+  # is cleaner for new work but shifts the numbers — see bon_tts/verifiers.py.
+  normalization: simple
+
+evaluation:
+  # Three disjoint ASR lineages. fwhisper-lgv3 is the official F5-TTS evaluator
+  # and the number to quote; the others test whether a result is family-specific.
+  evaluators:
+    - fwhisper-lgv3
+    - w2v2-lv60
+    - hubert-lg

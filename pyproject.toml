@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bon-tts"
+version = "0.1.0"
+description = "Best-of-N zero-shot TTS: ASR verifiers, cross-family rank ensembles, and cross-evaluator triangulation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["text-to-speech", "best-of-n", "asr", "verifier", "evaluation", "flow-matching"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# torch/torchaudio are intentionally excluded — see requirements.txt.
+dependencies = [
+    "f5-tts>=1.1.0",
+    "transformers>=4.44,<5",
+    "faster-whisper>=1.1.0",
+    "jiwer>=3.0",
+    "zhon>=2.0",
+    "numpy>=1.26,<3",
+    "scipy>=1.11",
+    "soundfile>=0.12",
+    "librosa>=0.10",
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[tool.setuptools]
+packages = ["bon_tts"]
+
+[tool.ruff]
+# 110 rather than the usual 100: HuggingFace checkpoint ids, run names built
+# from them, and the verbatim LibriSpeech-PC reference transcripts in the tests
+# do not reflow without hurting readability.
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

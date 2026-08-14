@@ -1,0 +1,37 @@
+# Runtime dependencies.
+#
+# torch and torchaudio are deliberately NOT pinned here: the correct wheel
+# depends on your CUDA version. The Docker image inherits them from the
+# pytorch/pytorch base image. For a bare-metal install, install them first
+# following https://pytorch.org/get-started/locally/ (torch>=2.4 required for
+# the F5-TTS inference path used here), then `pip install -r requirements.txt`.
+#
+# requirements.lock.txt holds the exact resolved versions from the container the
+# reproduction was run in; use it when you need bit-comparable numbers.
+
+# Zero-shot TTS backbone. Needs get_epss_timesteps (EPSS solver schedule) and
+# the fused cfg_infer transformer path, both used by bon_tts/f5_backend.py.
+f5-tts>=1.1.0
+
+# Verifier and evaluator ASR models.
+transformers>=4.44,<5
+# faster-whisper (CTranslate2) serves the official F5-TTS Whisper-large-v3
+# evaluator. Requires cuDNN 9 on the library path, which the base image provides.
+faster-whisper>=1.1.0
+
+# Metrics.
+jiwer>=3.0
+# zhon supplies the CJK punctuation set that the F5-TTS official text
+# normalization deletes; taking it from the source keeps us identical to
+# upstream instead of relying on a transcribed character list.
+zhon>=2.0
+numpy>=1.26,<3
+scipy>=1.11
+
+# Audio I/O.
+soundfile>=0.12
+librosa>=0.10
+
+# Config and progress.
+pyyaml>=6.0
+tqdm>=4.66
